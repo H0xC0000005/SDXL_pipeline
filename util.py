@@ -1,7 +1,7 @@
 import os
 import json
 import random
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Any, Tuple
 
 import PIL
 
@@ -20,21 +20,34 @@ class PromptLoader:
             print(e)
             raise e
         self.json_dict = data
-        self.filenames = tuple(data.keys())
-        self.prompts = tuple(data.values())
+        self.filenames: Tuple[str] = tuple(data.keys())
+        self.prompts: Tuple[str] = tuple(data.values())
         self.processed_head_idx = 0
 
-    def batch(self, batch_size: Optional[int] = None):
+    def batch(self, batch_size: Optional[int] = None) -> tuple[tuple, tuple[str, ...], tuple[str, ...]]:
         if self.processed_head_idx >= len(self.json_dict):
-            raise IndexError(f"all pairs in prompt loader had been loaded.")
+            raise IndexError(f"all pairs in prompt loader had been loaded. loaded total number: {len(self.json_dict)}")
         if batch_size is None:
             batch_size = len(self.json_dict) - self.processed_head_idx
         else:
-            assert batch_size <= len(self.json_dict) - self.processed_head_idx, \
-                (f"specified batch size {batch_size} greater than prompt loader remaining "
-                 f"cached prompts: {len(self.json_dict - self.processed_head_idx)}.")
-        cur_batch = (self.filenames[self.processed_head_idx: self.processed_head_idx+batch_size],
-                     self.prompts[self.processed_head_idx: self.processed_head_idx+batch_size])
+            batch_size = min(batch_size, len(self.json_dict)-self.processed_head_idx)
+        prompt_slice: Tuple[str] = self.prompts[self.processed_head_idx: self.processed_head_idx + batch_size]
+        prompts = []
+        neg_prompts = []
+        for raw_prompt in prompt_slice:
+            splitted_raw = raw_prompt.split("\n")
+            if len(splitted_raw) == 1:
+                prompts.append(splitted_raw[0])
+                neg_prompts.append('')
+            else:
+                prompts.append(splitted_raw[0])
+                neg_prompts.append(splitted_raw[1])
+        prompts = tuple(prompts)
+        neg_prompts = tuple(neg_prompts)
+
+        cur_batch = (self.filenames[self.processed_head_idx: self.processed_head_idx + batch_size],
+                     prompts,
+                     neg_prompts)
         self.processed_head_idx += batch_size
         return cur_batch
 
@@ -46,10 +59,10 @@ class PromptLoader:
     def shuffle(self):
         length = len(self.json_dict)
         for idx in range(length):
-            cur_flip_idx = random.randint(idx, length-1)
+            cur_flip_idx = random.randint(idx, length - 1)
             self.filenames[idx], self.filenames[cur_flip_idx] = self.filenames[cur_flip_idx], self.filenames[idx]
             self.prompts[idx], self.prompts[cur_flip_idx] = self.prompts[cur_flip_idx], self.prompts[idx]
-    
+
     def save_images(self, images):
         # assert len(self.filenames) == images, f"try to save images with inconsistent length filename and image lists"
         for filename, image in zip(self.filenames, images):
@@ -61,6 +74,3 @@ class PromptLoader:
 
     def get_json_dict(self):
         return self.json_dict
-
-
-
