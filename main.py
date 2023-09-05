@@ -5,9 +5,10 @@ import accelerate
 import diffusers
 import torch
 import torchvision
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict, List, Tuple, Iterable, Sized
 import safetensors
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, StableDiffusionPipeline
+from util import PromptLoader
 
 
 class SDXLInferencePipeline:
@@ -39,6 +40,8 @@ class SDXLInferencePipeline:
                 if cache_model:
                     self.base.save_pretrained(base_model_path)
                     print(f"base model is cached at {base_model_path}.")
+        self.base.enable_vae_slicing()
+        self.base.enable_vae_tiling()
         try:
             # need to integrate with accelerate here
             self.base.to("cuda")
@@ -83,6 +86,8 @@ class SDXLInferencePipeline:
                 if cache_model:
                     self.refiner.save_pretrained(refiner_model_path)
                     print(f"refiner model is cached at {refiner_model_path}.")
+            self.refiner.enable_vae_slicing()
+            self.refiner.enable_vae_tiling()
             try:
                 self.refiner.to("cuda")
             except Exception as e:
@@ -95,7 +100,26 @@ class SDXLInferencePipeline:
             print(self.base)
             print(self.refiner)
 
-    def __call__(self, prompts: List[str], negative_prompts: Optional[List[str]] = None,
+    @classmethod
+    def from_namespace(cls, ns: argparse.Namespace):
+        pass
+        """
+            def __init__(self, base_model_path: str = "./model_cache/SDXL_base",
+                 refiner_model_path: str = "./model_cache/SDXL_refiner",
+                 cache_model: bool = True, refine: bool = True,
+                 verbose: bool = False):"""
+        base_model_path = ns.base_model_path
+        refiner_model_path = ns.refiner_model_path
+        cache_model = ns.cache_model
+        refine = ns.use_refiner
+        verbose = False
+        return cls(base_model_path,
+                   refiner_model_path,
+                   cache_model,
+                   refine,
+                   verbose)
+
+    def __call__(self, prompts: Sized[str], negative_prompts: Optional[Sized[str]] = None,
                  inference_steps: int = 50,
                  target_size: Tuple[int, int] = (512, 512),
                  base_only: bool = False,
@@ -115,6 +139,7 @@ class SDXLInferencePipeline:
                                     negative_prompt=negative_prompts,
                                     output_type=return_type,
                                     num_inference_steps=inference_steps,
+                                    target_size=target_size
                                     ).images
             refined_images = self.refiner(prompt=prompts,
                                           negative_prompts=negative_prompts,
@@ -128,10 +153,28 @@ class SDXLInferencePipeline:
                              negative_prompt=negative_prompts,
                              output_type=return_type,
                              num_inference_steps=inference_steps,
-                             target_size=target_size).images
+                             target_size=target_size
+                             ).images
 
-    def postprocessing(self, returned_images):
-        pass
+    def inference_with_prompt_loader(self,
+                                     loader: PromptLoader,
+                                     batch_size: int = 4,
+                                     inference_steps: int = 50,
+                                     target_size: Tuple[int, int] = (512, 512),
+                                     base_only: bool = False,
+                                     return_type: str = "pil"
+                                     ):
+        filenames, prompts, neg_prompts = loader.batch(batch_size)
+        all_images = []
+        while True:
+            try:
+                images = self(prompts, neg_prompts, inference_steps, target_size, base_only, return_type).images
+                all_images.extend(images)
+            except IndexError as e:
+                print(e)
+                break
+        return all_images
+
 
 
 def parse_arg():
@@ -143,6 +186,7 @@ def parse_arg():
     parser.add_argument("--output_height", type=int, default=512)
     parser.add_argument("--base_model_path", type=str, default="")
     parser.add_argument("--refiner_model_path", type=str, default="")
+    parser.add_argument("--cache_model", type=bool, default=True)
 
     return parser.parse_args()
 
