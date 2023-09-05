@@ -47,6 +47,9 @@ class PromptLoader:
             cur_flip_idx = random.randint(idx, length-1)
             self.filenames[idx], self.filenames[cur_flip_idx] = self.filenames[cur_flip_idx], self.filenames[idx]
             self.prompts[idx], self.prompts[cur_flip_idx] = self.prompts[cur_flip_idx], self.prompts[idx]
+    
+    def save_images(self, images: List[PIL.Image]):
+        pass
 
 
 
