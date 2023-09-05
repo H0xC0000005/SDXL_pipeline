@@ -1,0 +1,4 @@
+{
+  "test1": "Hello, world\nnegative hello world",
+  "test2": "Hello world again\nnot negative this time!"
+}
