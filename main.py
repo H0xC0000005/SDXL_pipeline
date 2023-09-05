@@ -5,6 +5,12 @@ import accelerate
 import diffusers
 import torch
 import torchvision
+from typing import Optional, Dict, List, Tuple
+import safetensors
+from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, StableDiffusionPipeline
+
+
+
 from typing import Optional, Dict, List, Tuple, Iterable, Sized
 import safetensors
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, StableDiffusionPipeline
@@ -156,6 +162,7 @@ class SDXLInferencePipeline:
                              target_size=target_size
                              ).images
 
+
     def inference_with_prompt_loader(self,
                                      loader: PromptLoader,
                                      batch_size: int = 4,
@@ -176,6 +183,18 @@ class SDXLInferencePipeline:
         return all_images
 
 
+
+    def postprocessing(self, returned_images):
+        pass
+
+
+def parse_arg():
+    parser = argparse.ArgumentParser(prog="Arguments to run SDXL inference pipeline",
+                                     description="Arguments to run SDXL inference pipeline")
+
+
+if __name__ == "__main__":
+    sdxl_pipeline = SDXLInferencePipeline()
 
 def parse_arg():
     parser = argparse.ArgumentParser(prog="Arguments to run SDXL inference pipeline",
