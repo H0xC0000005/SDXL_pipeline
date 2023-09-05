@@ -2,7 +2,7 @@ from util import PromptLoader
 from main import SDXLInferencePipeline
 import os
 
-sp = SDXLInferencePipeline(verbose=False, refine=False)
+sp = SDXLInferencePipeline(verbose=False, refine=True)
 #
 # # img = sp(["an SR-71 spy plane", "a cute girl, anime style", "a GPU cluster",
 # #           "a researcher in front of some computer screens",
@@ -20,7 +20,7 @@ sp = SDXLInferencePipeline(verbose=False, refine=False)
 # for idx in range(len(img)):
 #     img[idx].save(f"./test_images/test{idx}.png", "PNG")
 pl = PromptLoader("./play.json")
-img = sp.inference_with_prompt_loader(pl, batch_size=3, base_only=True)
+img = sp.inference_with_prompt_loader(pl, batch_size=3, base_only=False)
 
 if not os.path.exists("./test_images/"):
     # If it doesn't exist, create it

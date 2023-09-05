@@ -125,7 +125,7 @@ class SDXLInferencePipeline:
                    refine,
                    verbose)
 
-    def __call__(self, prompts: Sized[str], negative_prompts: Optional[Sized[str]] = None,
+    def __call__(self, prompts, negative_prompts = None,
                  inference_steps: int = 50,
                  target_size: Tuple[int, int] = (512, 512),
                  base_only: bool = False,
@@ -148,7 +148,7 @@ class SDXLInferencePipeline:
                                     target_size=target_size
                                     ).images
             refined_images = self.refiner(prompt=prompts,
-                                          negative_prompts=negative_prompts,
+                                          negative_prompt=negative_prompts,
                                           num_inference_steps=inference_steps,
                                           image=base_images,
                                           target_size=target_size
@@ -171,11 +171,16 @@ class SDXLInferencePipeline:
                                      base_only: bool = False,
                                      return_type: str = "pil"
                                      ):
-        filenames, prompts, neg_prompts = loader.batch(batch_size)
         all_images = []
         while True:
             try:
-                images = self(prompts, neg_prompts, inference_steps, target_size, base_only, return_type).images
+                filenames, prompts, neg_prompts = loader.batch(batch_size)
+                if not isinstance(prompts, list):
+                    prompts = list(prompts)
+                if not isinstance(neg_prompts, list):
+                    neg_prompts = list(neg_prompts)
+                print(f"inference current batch:")
+                images = self(prompts, neg_prompts, inference_steps, target_size, base_only, return_type)
                 all_images.extend(images)
             except IndexError as e:
                 print(e)
