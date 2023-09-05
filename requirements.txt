@@ -1,5 +1,8 @@
-transformers
-diffusers
-accelerate
-torch
-torchvision
+transformers~=4.33.0
+diffusers~=0.20.2
+accelerate~=0.22.0
+torch~=2.0.1
+torchvision~=0.15.2
+
+safetensors~=0.3.3
+Pillow~=10.0.0
