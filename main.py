@@ -39,6 +39,12 @@ class SDXLInferencePipeline:
                 if cache_model:
                     self.base.save_pretrained(base_model_path)
                     print(f"base model is cached at {base_model_path}.")
+            try:
+                # need to integrate with accelerate here
+                self.base.to("cuda")
+            except Exception as e:
+                print(type(e))
+                raise e
             if refine:
                 try:
                     self.refiner = StableDiffusionXLImg2ImgPipeline.from_pretrained(
@@ -60,6 +66,11 @@ class SDXLInferencePipeline:
                     if cache_model:
                         self.refiner.save_pretrained(refiner_model_path)
                         print(f"refiner model is cached at {refiner_model_path}.")
+                try:
+                    self.refiner.to("cuda")
+                except Exception as e:
+                    print(type(e))
+                    raise(e)
 
             else:
                 self.refiner = None
