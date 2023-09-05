@@ -4,10 +4,13 @@ import os
 
 sp = SDXLInferencePipeline(verbose=False, refine=False)
 
-img = sp(["an SR-71 spy plane", "a cute girl, anime style", "a GPU cluster",
-          "a researcher in front of some computer screens",
-          "a street scene of Tokyo Station",
-          "a computer science Phd student painting an acrylic painting"], inference_steps=30, base_only=True)
+# img = sp(["an SR-71 spy plane", "a cute girl, anime style", "a GPU cluster",
+#           "a researcher in front of some computer screens",
+#           "a street scene of Tokyo Station",
+#           "a computer science Phd student painting an acrylic painting"], inference_steps=30, base_only=True)
+prompts = ["a cute girl, anime style", "a GPU cluster"]
+negative_prompts = ['', '']
+img = sp(prompts, negative_prompts, inference_steps=50, base_only=False)
 print(img)
 print(img[0])
 print(type(img[0]))
