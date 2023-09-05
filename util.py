@@ -31,6 +31,7 @@ class PromptLoader:
             batch_size = len(self.json_dict) - self.processed_head_idx
         else:
             batch_size = min(batch_size, len(self.json_dict)-self.processed_head_idx)
+        print(f"cur batch size {batch_size} and selected: {self.processed_head_idx}, {self.processed_head_idx + batch_size}")
         prompt_slice: Tuple[str] = self.prompts[self.processed_head_idx: self.processed_head_idx + batch_size]
         prompts = []
         neg_prompts = []
