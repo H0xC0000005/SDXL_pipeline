@@ -145,12 +145,14 @@ class SDXLInferencePipeline:
                                     negative_prompt=negative_prompts,
                                     output_type=return_type,
                                     num_inference_steps=inference_steps,
+                                    original_size=target_size,
                                     target_size=target_size
                                     ).images
             refined_images = self.refiner(prompt=prompts,
                                           negative_prompt=negative_prompts,
                                           num_inference_steps=inference_steps,
                                           image=base_images,
+                                          original_size=target_size,
                                           target_size=target_size
                                           ).images
             return refined_images
@@ -159,6 +161,7 @@ class SDXLInferencePipeline:
                              negative_prompt=negative_prompts,
                              output_type=return_type,
                              num_inference_steps=inference_steps,
+                             original_size=target_size,
                              target_size=target_size
                              ).images
 

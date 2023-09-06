@@ -64,11 +64,16 @@ class PromptLoader:
             self.filenames[idx], self.filenames[cur_flip_idx] = self.filenames[cur_flip_idx], self.filenames[idx]
             self.prompts[idx], self.prompts[cur_flip_idx] = self.prompts[cur_flip_idx], self.prompts[idx]
 
-    def save_images(self, images):
+    def save_images(self, images, path: str):
+        if not os.path.exists(path):
+            # If it doesn't exist, create it
+            os.makedirs(path)
+        if path[-1] in ("\", r"/"):
+            path = path[:-1]
         # assert len(self.filenames) == images, f"try to save images with inconsistent length filename and image lists"
         for filename, image in zip(self.filenames, images):
             # assert isinstance(image, PIL.Image.Image), f"get image as class {type(image)} instead of PIL image"
-            image.save(f"{filename}.png", "PNG")
+            image.save(f"{path}/{filename}.png", "PNG")
 
     def get_filenames(self):
         return self.filenames
