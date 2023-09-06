@@ -9,8 +9,6 @@ from typing import Optional, Dict, List, Tuple
 import safetensors
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, StableDiffusionPipeline
 
-
-
 from typing import Optional, Dict, List, Tuple, Iterable, Sized
 import safetensors
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, StableDiffusionPipeline
@@ -25,7 +23,8 @@ class SDXLInferencePipeline:
                  refiner_model_path: str = "./model_cache/SDXL_refiner",
                  cache_model: bool = True, refine: bool = True,
                  verbose: bool = False,
-                 device_id: int = 0):
+                 device_id: int = 0,
+                 ):
         if base_model_path:
             try:
                 self.base = StableDiffusionXLPipeline.from_pretrained(base_model_path,
@@ -57,14 +56,6 @@ class SDXLInferencePipeline:
             raise e
         if refine:
             """
-            refiner = DiffusionPipeline.from_pretrained(
-                "stabilityai/stable-diffusion-xl-refiner-1.0",
-                text_encoder_2=pipe.text_encoder_2,
-                vae=pipe.vae,
-                torch_dtype=torch.float16,
-                use_safetensors=True,
-                variant="fp16",
-            )
             "stabilityai/stable-diffusion-xl-refiner-1.0"
             """
             try:
@@ -96,10 +87,10 @@ class SDXLInferencePipeline:
             self.refiner.enable_vae_slicing()
             self.refiner.enable_vae_tiling()
             try:
-                self.refiner.to("cuda")
+                self.refiner.to(f"cuda:{device_id}")
             except Exception as e:
                 print(type(e))
-                raise (e)
+                raise e
 
         else:
             self.refiner = None
@@ -111,22 +102,28 @@ class SDXLInferencePipeline:
     def from_namespace(cls, ns: argparse.Namespace):
         pass
         """
-            def __init__(self, base_model_path: str = "./model_cache/SDXL_base",
+    def __init__(self, base_model_path: str = "./model_cache/SDXL_base",
                  refiner_model_path: str = "./model_cache/SDXL_refiner",
                  cache_model: bool = True, refine: bool = True,
-                 verbose: bool = False):"""
+                 verbose: bool = False,
+                 device_id: int = 0,
+                 ):
+                 """
         base_model_path = ns.base_model_path
         refiner_model_path = ns.refiner_model_path
         cache_model = ns.cache_model
         refine = ns.use_refiner
         verbose = False
+        device_id = ns.device_id
         return cls(base_model_path,
                    refiner_model_path,
                    cache_model,
                    refine,
-                   verbose)
+                   verbose,
+                   device_id=device_id
+                   )
 
-    def __call__(self, prompts, negative_prompts = None,
+    def __call__(self, prompts, negative_prompts=None,
                  inference_steps: int = 50,
                  target_size: Tuple[int, int] = (512, 512),
                  base_only: bool = False,
@@ -166,7 +163,6 @@ class SDXLInferencePipeline:
                              target_size=target_size
                              ).images
 
-
     def inference_with_prompt_loader(self,
                                      loader: PromptLoader,
                                      batch_size: int = 4,
@@ -193,9 +189,6 @@ class SDXLInferencePipeline:
         return all_images
 
 
-
-
-
 def parse_arg():
     parser = argparse.ArgumentParser(prog="Arguments to run SDXL inference pipeline",
                                      description="Arguments to run SDXL inference pipeline")
@@ -204,20 +197,54 @@ def parse_arg():
 if __name__ == "__main__":
     sdxl_pipeline = SDXLInferencePipeline()
 
+
 def parse_arg():
+
+    def _parse_2_elem_int_str(s: str):
+        splitted = s.split(":")
+        if len(splitted) < 2:
+            splitted = s.split(",")
+            if len(splitted) < 2:
+                raise ValueError(f"argument 2-elem tuple should either be seperated by ':' or ','")
+        splitted = [int(x) for x in splitted]
+        return tuple(splitted)
+
+    # SDXL pipeline args
     parser = argparse.ArgumentParser(prog="Arguments to run SDXL inference pipeline",
                                      description="Arguments to run SDXL inference pipeline")
-    parser.add_argument("--num_of_inference", type=int, default=50)
     parser.add_argument("--use_refiner", action="store_true")
-    parser.add_argument("--output_width", type=int, default=512)
-    parser.add_argument("--output_height", type=int, default=512)
     parser.add_argument("--base_model_path", type=str, default="")
     parser.add_argument("--refiner_model_path", type=str, default="")
     parser.add_argument("--cache_model", type=bool, default=True)
+    parser.add_argument("--device_id", type=int, default=0)
+    parser.add_argument("--verbose", action="store_true")
+
+    # prompt loader args
+    parser.add_argument("--prompt_loader_data_file_path", type=str)
+    parser.add_argument("--responsible_slice", type=_parse_2_elem_int_str, default=None)
+
+    # inference arguments
+    parser.add_argument("--batch_size", type=int, default=None)
+    parser.add_argument("--inference_steps", type=int, default=50)
+    parser.add_argument("--target_size", type=_parse_2_elem_int_str, default=(512, 512))
+    parser.add_argument("--base_only_inference", type=bool, default=True)
+    parser.add_argument("--return_type", type=str, default="pil")
 
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_arg()
-    sdxl_pipeline = SDXLInferencePipeline()
+    sdxl_pipeline = SDXLInferencePipeline.from_namespace(args)
+    prompt_loader = PromptLoader.from_namespace(args)
+
+    """
+        def inference_with_prompt_loader(self,
+                                     loader: PromptLoader,
+                                     batch_size: int = 4,
+                                     inference_steps: int = 50,
+                                     target_size: Tuple[int, int] = (512, 512),
+                                     base_only: bool = False,
+                                     return_type: str = "pil"
+                                     ):
+    """
