@@ -175,6 +175,7 @@ class SDXLInferencePipeline:
                                      base_only: bool = False,
                                      return_type: str = "pil"
                                      ):
+        print(f">>> inference with a prompt loader with batch size {batch_size} and target output size {target_size}.")
         all_images = []
         while True:
             try:
