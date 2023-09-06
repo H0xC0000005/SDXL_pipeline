@@ -1,13 +1,14 @@
 import os
 import json
 import random
+from argparse import Namespace
 from typing import Dict, Optional, List, Any, Tuple
 
 import PIL
 
 
 class PromptLoader:
-    def __init__(self, file_path: str | os.PathLike):
+    def __init__(self, file_path: str | os.PathLike, responsible_slice: list[int, int] | Tuple[int, int] = None):
         self.file_path = file_path
         data: Dict[str: str]
         try:
@@ -23,6 +24,17 @@ class PromptLoader:
         self.filenames: Tuple[str] = tuple(data.keys())
         self.prompts: Tuple[str] = tuple(data.values())
         self.processed_head_idx = 0
+        if responsible_slice is not None:
+            self.responsible_slice = responsible_slice
+            self.filenames = self.filenames[responsible_slice[0]: responsible_slice[1]]
+            self.prompts = self.prompts[responsible_slice[0]: responsible_slice[1]]
+            self.json_dict = dict(zip(self.filenames, self.prompts))
+
+    @classmethod
+    def from_namespace(cls, ns: Namespace):
+        file_path = ns.file_path
+        responsible_slice = ns.responsible_slice
+        return cls(file_path, responsible_slice)
 
     def batch(self, batch_size: Optional[int] = None) -> tuple[tuple, tuple[str, ...], tuple[str, ...]]:
         if self.processed_head_idx >= len(self.json_dict):
@@ -30,8 +42,9 @@ class PromptLoader:
         if batch_size is None:
             batch_size = len(self.json_dict) - self.processed_head_idx
         else:
-            batch_size = min(batch_size, len(self.json_dict)-self.processed_head_idx)
-        print(f"cur batch size {batch_size} and selected: {self.processed_head_idx}, {self.processed_head_idx + batch_size}")
+            batch_size = min(batch_size, len(self.json_dict) - self.processed_head_idx)
+        print(
+            f"cur batch size {batch_size} and selected: {self.processed_head_idx}, {self.processed_head_idx + batch_size}")
         prompt_slice: Tuple[str] = self.prompts[self.processed_head_idx: self.processed_head_idx + batch_size]
         prompts = []
         neg_prompts = []
@@ -80,3 +93,6 @@ class PromptLoader:
 
     def get_json_dict(self):
         return self.json_dict
+
+    def __len__(self):
+        return len(self.json_dict)
