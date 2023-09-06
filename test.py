@@ -20,13 +20,15 @@ sp = SDXLInferencePipeline(verbose=False, refine=True)
 # for idx in range(len(img)):
 #     img[idx].save(f"./test_images/test{idx}.png", "PNG")
 pl = PromptLoader("./play.json")
-img = sp.inference_with_prompt_loader(pl, batch_size=3, base_only=False)
+img = sp.inference_with_prompt_loader(pl, batch_size=16, base_only=False)
+print(img[0])
 
 if not os.path.exists("./test_images/"):
     # If it doesn't exist, create it
     os.makedirs("./test_images/")
-for idx in range(len(img)):
-    img[idx].save(f"./test_images/test{idx}.png", "PNG")
+pl.save_images(img)
+
+print(pl.get_filenames())
 
 
 

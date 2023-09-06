@@ -1,6 +1,15 @@
 {
   "test1": "a detective standing infront of the Tokyo Station\nrainy day, grey background",
   "test2": "a blueprint of an assult rifle, put in a factory\ncolorless ",
-  "test3": "a girl with black evening gown, sitting at a cafe in Paris, anime style\n"
-
+  "test3": "a girl with black evening gown, sitting at a cafe in Paris, anime style\n",
+  "save1": "a deep learning model\n",
+  "save2": "a computer vision deep learning model\n",
+  "save3": "a deer made of lego bricks standing in front of a natural tree\n",
+  "b1": "a letter B twisted with letter M\n a single alphabet",
+  "b2": "a WWII era german tank shooting at a soviet tank\na single tank",
+  "no9": "a traffic sign in Berlin with text 'no9' on it",
+  "no10": "a fragment of Berlin wall with text 'no10' on it",
+  "no11": "a cute and young girl, carrying a backpack with text 'no11' on it, anime style",
+  "no12": "a gpu cluster with text 'no12' on the cabin of that cluster"
+  
 }
