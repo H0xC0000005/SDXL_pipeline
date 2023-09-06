@@ -68,7 +68,7 @@ class PromptLoader:
         if not os.path.exists(path):
             # If it doesn't exist, create it
             os.makedirs(path)
-        if path[-1] in ("\", r"/"):
+        if path[-1] in ("\\", "/"):
             path = path[:-1]
         # assert len(self.filenames) == images, f"try to save images with inconsistent length filename and image lists"
         for filename, image in zip(self.filenames, images):
