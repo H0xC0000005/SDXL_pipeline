@@ -24,7 +24,8 @@ class SDXLInferencePipeline:
     def __init__(self, base_model_path: str = "./model_cache/SDXL_base",
                  refiner_model_path: str = "./model_cache/SDXL_refiner",
                  cache_model: bool = True, refine: bool = True,
-                 verbose: bool = False):
+                 verbose: bool = False,
+                 device_id: int = 0):
         if base_model_path:
             try:
                 self.base = StableDiffusionXLPipeline.from_pretrained(base_model_path,
@@ -50,7 +51,7 @@ class SDXLInferencePipeline:
         self.base.enable_vae_tiling()
         try:
             # need to integrate with accelerate here
-            self.base.to("cuda")
+            self.base.to(f"cuda:{device_id}")
         except Exception as e:
             print(type(e))
             raise e
@@ -192,8 +193,6 @@ class SDXLInferencePipeline:
 
 
 
-    def postprocessing(self, returned_images):
-        pass
 
 
 def parse_arg():
