@@ -100,15 +100,6 @@ class SDXLInferencePipeline:
 
     @classmethod
     def from_namespace(cls, ns: argparse.Namespace):
-        pass
-        """
-    def __init__(self, base_model_path: str = "./model_cache/SDXL_base",
-                 refiner_model_path: str = "./model_cache/SDXL_refiner",
-                 cache_model: bool = True, refine: bool = True,
-                 verbose: bool = False,
-                 device_id: int = 0,
-                 ):
-                 """
         base_model_path = ns.base_model_path
         refiner_model_path = ns.refiner_model_path
         cache_model = ns.cache_model
@@ -129,6 +120,8 @@ class SDXLInferencePipeline:
                  base_only: bool = False,
                  return_type: str = "pil"):
         assert return_type.lower() in ("pil", "latent"), f"return type in __call__ should be one of: pil, latent"
+        height = target_size[0]
+        width = target_size[1]
         if negative_prompts is None:
             negative_prompts = [''] * len(prompts)
         else:
@@ -140,6 +133,8 @@ class SDXLInferencePipeline:
                 raise ValueError("using a base-only SDXL pipeline with refiner flag on (i.e. base_only = False)")
             return_type = "latent"
             base_images = self.base(prompt=prompts,
+                                    height=height,
+                                    width=width,
                                     negative_prompt=negative_prompts,
                                     output_type=return_type,
                                     num_inference_steps=inference_steps,
@@ -147,6 +142,8 @@ class SDXLInferencePipeline:
                                     target_size=target_size
                                     ).images
             refined_images = self.refiner(prompt=prompts,
+                                          height=height,
+                                          width=width,
                                           negative_prompt=negative_prompts,
                                           num_inference_steps=inference_steps,
                                           image=base_images,
@@ -156,6 +153,8 @@ class SDXLInferencePipeline:
             return refined_images
         else:
             return self.base(prompt=prompts,
+                             height=height,
+                             width=width,
                              negative_prompt=negative_prompts,
                              output_type=return_type,
                              num_inference_steps=inference_steps,
