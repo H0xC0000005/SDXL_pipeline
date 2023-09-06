@@ -1,0 +1,16 @@
+{
+    "use_refiner": false,
+    "base_model_path": "./models/SDXL_base/",
+    "refiner_model_path": "./models/SDXL_refiner",
+    "cache_model": false,
+    "device_id": [0,1,2,3],
+    "verbose": false,
+    "prompt_loader_data_file_path": "./play.json",
+
+    "batch_size": 256,
+    "inference_steps": 50,
+    "target_size": [1024,1024],
+    "base_only_inference": false,
+    "return_type": "pil"
+}
+
