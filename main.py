@@ -227,6 +227,9 @@ def parse_arg():
     parser.add_argument("--target_size", type=_parse_2_elem_int_str, default=(512, 512))
     parser.add_argument("--base_only_inference", action="store_true")
     parser.add_argument("--return_type", type=str, default="pil")
+    
+    # save image arguments
+    parser.add_argument("--save_image_path", type=str, default="./results/")
 
     return parser.parse_args()
 
@@ -245,7 +248,7 @@ if __name__ == "__main__":
     base_only_inference = args.base_only_inference
     return_type = args.return_type
     
-    dir_path = "./test_images/bash_test/"
+    dir_path = args.save_image_path
     if not os.path.exists(dir_path):
         # If it doesn't exist, create it
         os.makedirs(dir_path)
