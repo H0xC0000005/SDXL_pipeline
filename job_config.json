@@ -3,14 +3,14 @@
     "base_model_path": "./models/SDXL_base/",
     "refiner_model_path": "./models/SDXL_refiner",
     "cache_model": false,
-    "device_id": [0,1,2,3],
+    "device_id": [1,2],
     "verbose": false,
     "prompt_loader_data_file_path": "./play.json",
 
-    "batch_size": 256,
+    "batch_size": 16,
     "inference_steps": 50,
     "target_size": [1024,1024],
-    "base_only_inference": false,
+    "base_only_inference": true,
     "return_type": "pil"
 }
 
