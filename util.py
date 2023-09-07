@@ -1,10 +1,8 @@
-import os
 import json
+import os
 import random
 from argparse import Namespace
-from typing import Dict, Optional, List, Any, Tuple
-
-import PIL
+from typing import Dict, Optional, Tuple
 
 
 class PromptLoader:

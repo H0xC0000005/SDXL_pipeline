@@ -1,18 +1,10 @@
 import argparse
-
 import os
-import transformers
-import accelerate
-import diffusers
-import torch
-import torchvision
-from typing import Optional, Dict, List, Tuple
-import safetensors
-from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, StableDiffusionPipeline
+from typing import Tuple
 
-from typing import Optional, Dict, List, Tuple, Iterable, Sized
-import safetensors
-from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, StableDiffusionPipeline
+import torch
+from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
+
 from util import PromptLoader
 
 
@@ -235,6 +227,10 @@ def parse_arg():
 
 
 if __name__ == "__main__":
+    """
+     the version that can only run on a single gpu: rely on external multiprocessing such as bash & 
+     background process
+    """
     print(f">>> begin to run main.")
     args = parse_arg()
     print(f"arg parsed. <<<")
@@ -261,13 +257,3 @@ if __name__ == "__main__":
 
     # print(pl.get_filenames())
 
-    """
-        def inference_with_prompt_loader(self,
-                                     loader: PromptLoader,
-                                     batch_size: int = 4,
-                                     inference_steps: int = 50,
-                                     target_size: Tuple[int, int] = (512, 512),
-                                     base_only: bool = False,
-                                     return_type: str = "pil"
-                                     ):
-    """
