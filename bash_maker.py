@@ -6,7 +6,7 @@ from util import PromptLoader
 
 def make_job_bash(job_name: str, job_config_file_path: str | os.PathLike, gpu_id_list: list[int] | None = None, split_line: bool = False):
     if split_line:
-        suffix - " \\ \n"
+        suffix = " \\ \n"
     else:
         suffix = ' '
     try:
@@ -47,12 +47,14 @@ def make_job_bash(job_name: str, job_config_file_path: str | os.PathLike, gpu_id
             cur_slice = (cur_partition_start, cur_partition_start + size_of_partition)
             responsible_slice_str = f"--responsible_slice {cur_slice[0]}:{cur_slice[1]} {suffix}"
             cur_partition_start += size_of_partition
-            file.write(f"python3 {job_name}.py {suffix}"
+            # pipeline can be automatically on GPU, hence 
+            file.write(f"export CUDA_VISIBLE_DEVICES={gpu_id} && "
+                       f"python3 {job_name}.py {suffix}"
                        f"{use_refiner}"
                        f"{base_model_path}"
                        f"{refiner_model_path}"
                        f"{cache_model}"
-                       f"--device_id {gpu_id} {suffix}"
+                       # f"--device_id {gpu_id} {suffix}"
                        f"{verbose}"
                        f"{prompt_loader_data_file_path}"
                        f"{responsible_slice_str}"
