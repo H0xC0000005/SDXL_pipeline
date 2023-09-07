@@ -1,5 +1,6 @@
 import argparse
 
+import os
 import transformers
 import accelerate
 import diffusers
@@ -171,7 +172,6 @@ class SDXLInferencePipeline:
                                      return_type: str = "pil"
                                      ):
         print(f">>> inference with a prompt loader with batch size {batch_size} and target output size {target_size}.")
-        all_images = []
         while True:
             try:
                 filenames, prompts, neg_prompts = loader.batch(batch_size)
@@ -181,11 +181,10 @@ class SDXLInferencePipeline:
                     neg_prompts = list(neg_prompts)
                 print(f"inference current batch:")
                 images = self(prompts, neg_prompts, inference_steps, target_size, base_only, return_type)
-                all_images.extend(images)
+                yield images, filenames
             except IndexError as e:
                 print(e)
                 break
-        return all_images
 
 
 def parse_arg():
@@ -226,16 +225,38 @@ def parse_arg():
     parser.add_argument("--batch_size", type=int, default=None)
     parser.add_argument("--inference_steps", type=int, default=50)
     parser.add_argument("--target_size", type=_parse_2_elem_int_str, default=(512, 512))
-    parser.add_argument("--base_only_inference", type=bool, default=True)
+    parser.add_argument("--base_only_inference", action="store_true")
     parser.add_argument("--return_type", type=str, default="pil")
 
     return parser.parse_args()
 
 
 if __name__ == "__main__":
+    print(f">>> begin to run main.")
     args = parse_arg()
+    print(f"arg parsed. <<<")
+    print(f"get arg: {args}")
+    device_id = args.device_id
     sdxl_pipeline = SDXLInferencePipeline.from_namespace(args)
     prompt_loader = PromptLoader.from_namespace(args)
+    batch_size = args.batch_size
+    inference_steps = args.inference_steps
+    target_size = args.target_size
+    base_only_inference = args.base_only_inference
+    return_type = args.return_type
+    
+    dir_path = "./test_images/bash_test/"
+    if not os.path.exists(dir_path):
+        # If it doesn't exist, create it
+        os.makedirs(dir_path)
+    for img, filenames in sdxl_pipeline.inference_with_prompt_loader(prompt_loader, 
+                                                                     batch_size=batch_size, 
+                                                                     base_only=base_only_inference, 
+                                                                     inference_steps=inference_steps, 
+                                                                     target_size=target_size):
+        prompt_loader.save_images(img, dir_path, filenames)
+
+    # print(pl.get_filenames())
 
     """
         def inference_with_prompt_loader(self,

@@ -1,8 +1,10 @@
 from util import PromptLoader
 from main import SDXLInferencePipeline
 import os
+import time
 
-sp = SDXLInferencePipeline(verbose=True, refine=False,  device_id=2)
+start = time.time()
+sp = SDXLInferencePipeline(verbose=True, refine=False,  device_id=3)
 #
 # # img = sp(["an SR-71 spy plane", "a cute girl, anime style", "a GPU cluster",
 # #           "a researcher in front of some computer screens",
@@ -19,16 +21,19 @@ sp = SDXLInferencePipeline(verbose=True, refine=False,  device_id=2)
 #     os.makedirs("./test_images/")
 # for idx in range(len(img)):
 #     img[idx].save(f"./test_images/test{idx}.png", "PNG")
-pl = PromptLoader("./play_temp.json")
-img = sp.inference_with_prompt_loader(pl, batch_size=128, base_only=True, inference_steps=50, target_size=(768,768))
-print(img[0])
-dir_path = "./test_images/768x768/"
+pl = PromptLoader("./filtered_96_swapped.json")
+
+dir_path = "./result_images/1024x1024/20230906_5000imgtest/"
 if not os.path.exists(dir_path):
     # If it doesn't exist, create it
     os.makedirs(dir_path)
-pl.save_images(img, dir_path)
+for img, filenames in sp.inference_with_prompt_loader(pl, batch_size=16, base_only=True, inference_steps=50, target_size=(1024,1024)):
+    pl.save_images(img, dir_path, filenames)
 
 print(pl.get_filenames())
+end = time.time()
+
+print(f">>> final elapsed time in sec: {start - end}")
 
 
 
