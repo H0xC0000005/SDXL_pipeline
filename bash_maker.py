@@ -41,6 +41,8 @@ def make_job_bash(job_name: str, job_config_file_path: str | os.PathLike, gpu_id
         target_size_str = f"--target_size {target_size[0]}:{target_size[1]} {suffix}"
         base_only_inference = f"--base_only_inference {suffix}" if not data["use_refiner"] else ''
         return_type = f'--return_type {data["return_type"]} {suffix}' if data["return_type"] else ''
+        
+        save_image_path = f'--save_image_path {data["save_image_path"]} {suffix}' if isinstance(data["save_image_path"], str) else ''
 
         for gpu_id in device_id:
             # want to get consistent jobs to avoid potential problems
@@ -62,7 +64,9 @@ def make_job_bash(job_name: str, job_config_file_path: str | os.PathLike, gpu_id
                        f"{inference_steps}"
                        f"{target_size_str}"
                        f"{base_only_inference}"
-                       f"{return_type} & \n")
+                       f"{return_type}"
+                       f"{save_image_path}"
+                       f"& \n")
 
 
 if __name__ == "__main__":

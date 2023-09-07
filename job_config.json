@@ -11,6 +11,8 @@
     "inference_steps": 50,
     "target_size": [1024,1024],
     "base_only_inference": true,
-    "return_type": "pil"
+    "return_type": "pil",
+
+    "save_image_path": "./test_images/bash_test/"
 }
 
