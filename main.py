@@ -180,16 +180,6 @@ class SDXLInferencePipeline:
 
 
 def parse_arg():
-    parser = argparse.ArgumentParser(prog="Arguments to run SDXL inference pipeline",
-                                     description="Arguments to run SDXL inference pipeline")
-
-
-if __name__ == "__main__":
-    sdxl_pipeline = SDXLInferencePipeline()
-
-
-def parse_arg():
-
     def _parse_2_elem_int_str(s: str):
         splitted = s.split(":")
         if len(splitted) < 2:
@@ -219,7 +209,7 @@ def parse_arg():
     parser.add_argument("--target_size", type=_parse_2_elem_int_str, default=(512, 512))
     parser.add_argument("--base_only_inference", action="store_true")
     parser.add_argument("--return_type", type=str, default="pil")
-    
+
     # save image arguments
     parser.add_argument("--save_image_path", type=str, default="./results/")
 
@@ -243,17 +233,16 @@ if __name__ == "__main__":
     target_size = args.target_size
     base_only_inference = args.base_only_inference
     return_type = args.return_type
-    
+
     dir_path = args.save_image_path
     if not os.path.exists(dir_path):
         # If it doesn't exist, create it
         os.makedirs(dir_path)
-    for img, filenames in sdxl_pipeline.inference_with_prompt_loader(prompt_loader, 
-                                                                     batch_size=batch_size, 
-                                                                     base_only=base_only_inference, 
-                                                                     inference_steps=inference_steps, 
+    for img, filenames in sdxl_pipeline.inference_with_prompt_loader(prompt_loader,
+                                                                     batch_size=batch_size,
+                                                                     base_only=base_only_inference,
+                                                                     inference_steps=inference_steps,
                                                                      target_size=target_size):
         prompt_loader.save_images(img, dir_path, filenames)
 
     # print(pl.get_filenames())
-
